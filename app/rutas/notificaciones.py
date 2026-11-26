@@ -23,7 +23,7 @@ def abrir(nid):
     n = db.session.get(Notificacion, nid)
     if n is None or n.usuario_id != current_user.id:
         abort(404)
-    n.leida = True
+    n.marcar_leida()
     db.session.commit()
     if n.solicitud_id:
         return redirect(url_for("solicitudes.detalle", sid=n.solicitud_id))

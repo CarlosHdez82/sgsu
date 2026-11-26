@@ -187,6 +187,9 @@ class Notificacion(db.Model):
     usuario = db.relationship("Usuario", back_populates="notificaciones")
     solicitud = db.relationship("Solicitud")
 
+    def marcar_leida(self):
+        self.leida = True
+
 
 class Parametro(db.Model):
     __tablename__ = "parametro"
