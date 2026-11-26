@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios{% endblock %}
+{% block encabezado %}Usuarios y roles{% endblock %}
+{% block cuerpo %}
+<form class="filtros" method="get">
+  <input type="search" name="q" placeholder="Nombre, correo o documento" value="{{ texto }}">
+  <select name="rol"><option value="">Todos los roles</option>
+    {% for r in roles %}<option value="{{ r.nombre }}" {{ 'selected' if rol == r.nombre }}>{{ r.nombre|capitalize }}</option>{% endfor %}</select>
+  <button class="btn btn-sec">Buscar</button>
+  <a class="btn btn-pri derecha" href="{{ url_for('usuarios.formulario') }}">+ Nuevo usuario</a>
+</form>
+<div class="tarjeta">
+<div class="tabla-envoltura">
+<table class="tabla">
+  <thead><tr><th>Nombre</th><th>Documento</th><th>Correo</th><th>Rol</th><th>Dependencia</th><th>Estado</th><th></th></tr></thead>
+  <tbody>
+  {% for u in usuarios %}
+    <tr>
+      <td><strong>{{ u.nombre }}</strong></td><td>{{ u.documento }}</td><td>{{ u.correo }}</td>
+      <td><span class="rol rol-{{ u.rol.nombre|lower }}">{{ u.rol.nombre|capitalize }}</span></td>
+      <td>{{ u.dependencia }}</td>
+      <td>{{ 'Activo' if u.activo else 'Inactivo' }}</td>
+      <td><a href="{{ url_for('usuarios.formulario', uid=u.id) }}">Editar</a></td>
+    </tr>
+  {% else %}<tr><td colspan="7" class="vacio">No se encontraron usuarios.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+<div class="tarjeta suave">
+  <h3>Roles del sistema</h3>
+  <ul class="lista-simple">{% for r in roles %}<li><b>{{ r.nombre|capitalize }}:</b> {{ r.descripcion }}</li>{% endfor %}</ul>
+</div>
+{% endblock %}

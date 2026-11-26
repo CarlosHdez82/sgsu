@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Nueva solicitud{% endblock %}
+{% block encabezado %}Nueva solicitud{% endblock %}
+{% block cuerpo %}
+<div class="dos-col">
+<div class="tarjeta">
+  <form method="post" class="form">
+    {{ csrf() }}
+    <label>Categoría *
+      <select name="categoria_id" required>
+        <option value="">Seleccione…</option>
+        {% for c in categorias %}<option value="{{ c.id }}" {{ 'selected' if datos.categoria_id == c.id|string }}>{{ c.nombre }}</option>{% endfor %}
+      </select></label>
+    <label>Asunto *
+      <input name="asunto" maxlength="150" required value="{{ datos.asunto or '' }}" placeholder="Resumen corto de lo que necesita"></label>
+    <label>Descripción *
+      <textarea name="descripcion" rows="6" required placeholder="Explique su solicitud con el mayor detalle posible">{{ datos.descripcion or '' }}</textarea></label>
+    <label>Prioridad *
+      <select name="prioridad" required>
+        {% for p in prioridades %}<option value="{{ p }}" {{ 'selected' if (datos.prioridad or 'MEDIA') == p }}>{{ p|capitalize }}</option>{% endfor %}
+      </select></label>
+    <div class="fila-botones">
+      <button class="btn btn-pri">Registrar solicitud</button>
+      <a class="btn btn-sec" href="{{ url_for('solicitudes.lista') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+<div class="tarjeta suave">
+  <h3>Solicitante</h3>
+  <p><strong>{{ current_user.nombre }}</strong><br>{{ current_user.correo }}<br>Documento {{ current_user.documento }}<br>{{ current_user.dependencia }}</p>
+  <h3>Tiempos de respuesta</h3>
+  <ul class="lista-simple">
+    {% for c in categorias %}<li>{{ c.nombre }}: <b>{{ c.tiempo_respuesta_horas }} h</b></li>{% endfor %}
+  </ul>
+  <p class="muted">Al registrar la solicitud queda en estado <b>Registrada</b> y se avisa al supervisor para asignarla.</p>
+</div>
+</div>
+{% endblock %}

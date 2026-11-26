@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Parámetros{% endblock %}
+{% block encabezado %}Parámetros del sistema{% endblock %}
+{% block cuerpo %}
+<div class="tarjeta angosta">
+  <form method="post" class="form">
+    {{ csrf() }}
+    {% for p in parametros %}
+      <label>{{ p.descripcion }}<input name="{{ p.clave }}" value="{{ p.valor }}" required></label>
+    {% endfor %}
+    <div class="fila-botones"><button class="btn btn-pri">Guardar parámetros</button></div>
+  </form>
+</div>
+{% endblock %}

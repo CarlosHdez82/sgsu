@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Notificaciones{% endblock %}
+{% block encabezado %}Notificaciones{% endblock %}
+{% block cuerpo %}
+<div class="filtros">
+  <form method="post" action="{{ url_for('notificaciones.leer_todas') }}" class="derecha">{{ csrf() }}
+    <button class="btn btn-sec">Marcar todas como leídas</button></form>
+</div>
+<div class="tarjeta">
+  {% for n in avisos %}
+    <form method="post" action="{{ url_for('notificaciones.abrir', nid=n.id) }}" class="aviso {{ '' if n.leida else 'no-leida' }}">
+      {{ csrf() }}
+      <button class="aviso-boton">
+        <span class="aviso-punto"></span>
+        <span class="aviso-texto">{{ n.mensaje }}</span>
+        <span class="muted nowrap">{{ n.fecha|fecha }}</span>
+      </button>
+    </form>
+  {% else %}<p class="muted">No tiene notificaciones.</p>{% endfor %}
+</div>
+{% endblock %}

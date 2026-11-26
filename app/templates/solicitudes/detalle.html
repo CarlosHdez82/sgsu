@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "_macros.html" import estado, prioridad, csrf with context %}
+{% block titulo %}{{ s.codigo }}{% endblock %}
+{% block encabezado %}Solicitud {{ s.codigo }}{% endblock %}
+{% block cuerpo %}
+<div class="cabecera-sol">
+  <div>
+    <h2>{{ s.asunto }}</h2>
+    <p class="muted">Registrada el {{ s.fecha_registro|fecha }} por {{ s.solicitante.nombre }}</p>
+  </div>
+  <div class="chips">{{ estado(s) }} {{ prioridad(s.prioridad) }}
+    {% if s.vencida %}<span class="vencida">Vencida</span>{% endif %}</div>
+</div>
+
+<div class="dos-col">
+  <div>
+    <div class="tarjeta">
+      <h3>Datos de la solicitud</h3>
+      <dl class="datos">
+        <dt>Código</dt><dd>{{ s.codigo }}</dd>
+        <dt>Categoría</dt><dd>{{ s.categoria.nombre }}</dd>
+        <dt>Solicitante</dt><dd>{{ s.solicitante.nombre }} · {{ s.solicitante.correo }}</dd>
+        <dt>Responsable</dt><dd>{{ s.responsable.nombre if s.responsable else 'Sin asignar' }}</dd>
+        <dt>Fecha límite</dt><dd>{{ s.fecha_limite|fecha }} ({{ s.categoria.tiempo_respuesta_horas }} h)</dd>
+        <dt>Última actualización</dt><dd>{{ s.fecha_actualizacion|fecha }}</dd>
+        {% if s.fecha_cierre %}<dt>Fecha de cierre</dt><dd>{{ s.fecha_cierre|fecha }}</dd>{% endif %}
+      </dl>
+      <h3>Descripción</h3>
+      <p class="texto">{{ s.descripcion }}</p>
+      {% if s.solucion %}
+        <div class="solucion"><h3>Solución aplicada</h3><p class="texto">{{ s.solucion }}</p></div>
+      {% endif %}
+    </div>
+
+    <div class="tarjeta" id="observaciones">
+      <h3>Observaciones</h3>
+      {% for o in s.observaciones %}
+        <div class="obs {{ 'obs-sol' if o.es_solucion }}">
+          <div class="obs-cab"><b>{{ o.autor.nombre }}</b> <span class="muted">({{ o.autor.rol.nombre|capitalize }}) · {{ o.fecha|fecha }}</span>
+            {% if o.es_solucion %}<span class="chip chip-resuelta">Solución</span>{% endif %}</div>
+          <p class="texto">{{ o.texto }}</p>
+        </div>
+      {% else %}<p class="muted">Aún no hay observaciones.</p>{% endfor %}
+      {% if puede_observar %}
+        <form method="post" action="{{ url_for('solicitudes.observar', sid=s.id) }}" class="form">
+          {{ csrf() }}
+          <textarea name="texto" rows="3" placeholder="Escriba una observación…" required></textarea>
+          <button class="btn btn-sec">Agregar observación</button>
+        </form>
+      {% elif s.estado in ('CERRADA', 'RECHAZADA') %}
+        <p class="aviso-bloqueo">Esta solicitud está {{ s.nombre_estado|lower }} y no admite modificaciones{% if s.estado == 'CERRADA' %}, salvo una reapertura autorizada{% endif %}.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    {% if acciones %}
+    <div class="tarjeta acciones">
+      <h3>Acciones disponibles</h3>
+      {% for a in acciones %}
+        <details {{ 'open' if loop.first }}>
+          <summary>{{ NOMBRE_ACCION[a] }}</summary>
+          <form method="post" action="{{ url_for('solicitudes.accion', sid=s.id) }}" class="form">
+            {{ csrf() }}
+            <input type="hidden" name="accion" value="{{ a }}">
+            {% if a == ASIGNAR %}
+              <label>Funcionario responsable
+                <select name="responsable_id" required>
+                  <option value="">Seleccione…</option>
+                  {% for f in funcionarios %}<option value="{{ f.id }}" {{ 'selected' if f.id == s.responsable_id }}>{{ f.nombre }} — {{ f.dependencia }}</option>{% endfor %}
+                </select></label>
+              <label>Observación (opcional)<input name="motivo" maxlength="300"></label>
+            {% elif a == RESOLVER %}
+              <label>Solución aplicada *<textarea name="solucion" rows="4" required minlength="10"></textarea></label>
+            {% elif a in ('rechazar', 'reabrir') %}
+              <label>Motivo *<textarea name="motivo" rows="3" required minlength="5"></textarea></label>
+            {% else %}
+              <label>Observación (opcional)<input name="motivo" maxlength="300"></label>
+            {% endif %}
+            <button class="btn {{ 'btn-peligro' if a == 'rechazar' else 'btn-pri' }}">{{ NOMBRE_ACCION[a] }}</button>
+          </form>
+        </details>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="tarjeta">
+      <h3>Historial de estados</h3>
+      <ol class="linea-tiempo">
+        {% for h in s.historial %}
+          <li>
+            <span class="punto chip-{{ h.estado_nuevo|lower }}"></span>
+            <div>
+              <b>{% if h.estado_anterior and h.estado_anterior != h.estado_nuevo %}{{ M.NOMBRE_ESTADO[h.estado_anterior] }} → {% endif %}{{ M.NOMBRE_ESTADO[h.estado_nuevo] }}</b>
+              <div class="muted">{{ h.fecha|fecha }} · {{ h.usuario.nombre }}</div>
+              <div>{{ h.motivo }}</div>
+              {% if h.responsable %}<div class="muted">Responsable: {{ h.responsable.nombre }}</div>{% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</div>
+{% endblock %}

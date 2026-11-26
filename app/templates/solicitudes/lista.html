@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import tabla_solicitudes with context %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block encabezado %}{{ titulo }}{% endblock %}
+{% block cuerpo %}
+<form class="filtros" method="get">
+  <input type="search" name="q" placeholder="Código o asunto" value="{{ f.q }}">
+  <select name="estado"><option value="">Todos los estados</option>
+    {% for k, n in estados %}<option value="{{ k }}" {{ 'selected' if f.estado == k }}>{{ n }}</option>{% endfor %}</select>
+  <select name="categoria"><option value="">Todas las categorías</option>
+    {% for c in categorias %}<option value="{{ c.id }}" {{ 'selected' if f.categoria == c.id|string }}>{{ c.nombre }}</option>{% endfor %}</select>
+  <select name="prioridad"><option value="">Todas las prioridades</option>
+    {% for p in prioridades %}<option value="{{ p }}" {{ 'selected' if f.prioridad == p }}>{{ p|capitalize }}</option>{% endfor %}</select>
+  <button class="btn btn-sec">Filtrar</button>
+  <a class="limpiar" href="{{ url_for('solicitudes.lista') }}">Limpiar</a>
+  {% if current_user.rol.nombre == 'ESTUDIANTE' %}<a class="btn btn-pri derecha" href="{{ url_for('solicitudes.nueva') }}">+ Nueva solicitud</a>{% endif %}
+</form>
+<div class="tarjeta">
+  <p class="muted">{{ solicitudes|length }} resultado(s)</p>
+  {{ tabla_solicitudes(solicitudes, current_user.rol.nombre != 'ESTUDIANTE') }}
+</div>
+{% endblock %}

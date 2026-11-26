@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}Categorías{% endblock %}
+{% block encabezado %}Categorías de solicitudes{% endblock %}
+{% block cuerpo %}
+<div class="filtros"><a class="btn btn-pri derecha" href="{{ url_for('categorias.formulario') }}">+ Nueva categoría</a></div>
+<div class="tarjeta">
+<div class="tabla-envoltura">
+<table class="tabla">
+  <thead><tr><th>Nombre</th><th>Descripción</th><th>Tiempo de respuesta</th><th>Solicitudes</th><th>Estado</th><th></th></tr></thead>
+  <tbody>
+  {% for c in categorias %}
+    <tr>
+      <td><strong>{{ c.nombre }}</strong></td><td>{{ c.descripcion }}</td>
+      <td>{{ c.tiempo_respuesta_horas }} h</td><td>{{ c.solicitudes|length }}</td>
+      <td>{{ 'Activa' if c.activa else 'Inactiva' }}</td>
+      <td><a href="{{ url_for('categorias.formulario', cid=c.id) }}">Editar</a></td>
+    </tr>
+  {% else %}<tr><td colspan="6" class="vacio">No hay categorías.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+<p class="muted">Las categorías inactivas no aparecen al registrar solicitudes nuevas, pero se conservan en las existentes (integridad de la información).</p>
+{% endblock %}

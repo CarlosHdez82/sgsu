@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import tabla_solicitudes with context %}
+{% block titulo %}Inicio{% endblock %}
+{% block encabezado %}Hola, {{ current_user.nombre.split(' ')[0] }}{% endblock %}
+{% block cuerpo %}
+{% set r = current_user.rol.nombre %}
+<p class="intro">
+  {% if r == 'ESTUDIANTE' %}Registre sus solicitudes y siga su estado en un solo lugar.
+  {% elif r == 'FUNCIONARIO' %}Estas son las solicitudes que tiene asignadas para atender.
+  {% elif r == 'SUPERVISOR' %}Estado general de las solicitudes e indicadores de atención.
+  {% else %}Administración de usuarios, categorías y parámetros del sistema.{% endif %}
+</p>
+
+{% if indicadores %}
+<div class="kpis">
+  <div class="kpi"><span>Solicitudes abiertas</span><b>{{ indicadores.abiertas }}</b></div>
+  <div class="kpi {{ 'alerta-kpi' if indicadores.vencidas }}"><span>Vencidas (fuera de tiempo)</span><b>{{ indicadores.vencidas }}</b></div>
+  <div class="kpi"><span>Tiempo medio de resolución</span><b>{{ indicadores.promedio_horas if indicadores.promedio_horas is not none else '—' }} h</b></div>
+  <div class="kpi"><span>Resueltas a tiempo</span><b>{{ indicadores.cumplimiento if indicadores.cumplimiento is not none else '—' }} %</b></div>
+</div>
+{% endif %}
+
+{% if n_usuarios is defined %}
+<div class="kpis">
+  <div class="kpi"><span>Usuarios registrados</span><b>{{ n_usuarios }}</b></div>
+  <div class="kpi"><span>Categorías activas</span><b>{{ n_categorias }}</b></div>
+</div>
+{% endif %}
+
+<div class="tarjeta">
+  <div class="tarjeta-titulo"><h2>Solicitudes por estado</h2><span class="muted">{{ total }} en total</span></div>
+  <div class="estados">
+    {% for nombre, clave, n in conteo %}
+      <a class="estado-caja chip-{{ clave|lower }}" href="{{ url_for('solicitudes.lista', estado=clave) }}"><b>{{ n }}</b><span>{{ nombre }}</span></a>
+    {% endfor %}
+  </div>
+</div>
+
+{% if vencidas %}
+<div class="alerta alerta-error">Tiene {{ vencidas|length }} solicitud(es) que superaron el tiempo de respuesta:
+  {% for s in vencidas %}<a href="{{ url_for('solicitudes.detalle', sid=s.id) }}">{{ s.codigo }}</a>{{ ', ' if not loop.last }}{% endfor %}.</div>
+{% endif %}
+
+<div class="tarjeta">
+  <div class="tarjeta-titulo"><h2>Actividad reciente</h2>
+    {% if r == 'ESTUDIANTE' %}<a class="btn btn-pri btn-peq" href="{{ url_for('solicitudes.nueva') }}">+ Nueva solicitud</a>{% endif %}</div>
+  {{ tabla_solicitudes(recientes, r != 'ESTUDIANTE') }}
+</div>
+{% endblock %}

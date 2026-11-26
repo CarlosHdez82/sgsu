@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}SGSU{% endblock %} · SGSU</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<div class="marco">
+  <aside class="lateral">
+    <div class="marca">
+      <span class="logo">SG</span>
+      <div><strong>SGSU</strong><small>{{ institucion }}</small></div>
+    </div>
+    {% set rol_actual = current_user.rol.nombre %}
+    <nav>
+      <a href="{{ url_for('principal.inicio') }}" class="{{ 'activo' if request.endpoint == 'principal.inicio' }}">Inicio</a>
+      {% if rol_actual == 'ESTUDIANTE' %}
+        <a href="{{ url_for('solicitudes.nueva') }}" class="{{ 'activo' if request.endpoint == 'solicitudes.nueva' }}">Nueva solicitud</a>
+        <a href="{{ url_for('solicitudes.lista') }}" class="{{ 'activo' if request.endpoint in ('solicitudes.lista','solicitudes.detalle') }}">Mis solicitudes</a>
+      {% elif rol_actual == 'FUNCIONARIO' %}
+        <a href="{{ url_for('solicitudes.lista') }}" class="{{ 'activo' if request.endpoint in ('solicitudes.lista','solicitudes.detalle') }}">Solicitudes asignadas</a>
+      {% else %}
+        <a href="{{ url_for('solicitudes.lista') }}" class="{{ 'activo' if request.endpoint in ('solicitudes.lista','solicitudes.detalle') }}">Solicitudes</a>
+        <a href="{{ url_for('reportes.index') }}" class="{{ 'activo' if request.endpoint == 'reportes.index' }}">Reportes</a>
+      {% endif %}
+      {% if rol_actual == 'ADMINISTRADOR' %}
+        <span class="grupo">Administración</span>
+        <a href="{{ url_for('usuarios.lista') }}" class="{{ 'activo' if request.endpoint and request.endpoint.startswith('usuarios') }}">Usuarios y roles</a>
+        <a href="{{ url_for('categorias.lista') }}" class="{{ 'activo' if request.endpoint and request.endpoint.startswith('categorias') }}">Categorías</a>
+        <a href="{{ url_for('parametros.editar') }}" class="{{ 'activo' if request.endpoint == 'parametros.editar' }}">Parámetros</a>
+      {% endif %}
+    </nav>
+  </aside>
+  <div class="contenido">
+    <header class="barra">
+      <h1>{% block encabezado %}{% endblock %}</h1>
+      <div class="usuario">
+        {% set n = current_user.no_leidas() %}
+        <a class="campana" href="{{ url_for('notificaciones.lista') }}" title="Notificaciones">Avisos{% if n %} <b class="contador">{{ n }}</b>{% endif %}</a>
+        <span class="quien">{{ current_user.nombre }}<small>{{ current_user.rol.nombre|capitalize }}</small></span>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sec btn-peq">Salir</button>
+        </form>
+      </div>
+    </header>
+    <main>
+      {% for cat, msg in get_flashed_messages(with_categories=true) %}
+        <div class="alerta alerta-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+      {% block cuerpo %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% else %}
+  {% block publico %}{% endblock %}
+{% endif %}
+</body>
+</html>

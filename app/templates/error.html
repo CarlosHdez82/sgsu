@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Error {{ codigo }}{% endblock %}
+{% block encabezado %}Error {{ codigo }}{% endblock %}
+{% block cuerpo %}
+{% set mensajes = {400: "La petición no es válida.", 403: "No tiene permiso para acceder a esta página.", 404: "La página o el registro que busca no existe."} %}
+<div class="tarjeta centro">
+  <p class="grande">{{ mensajes[codigo] }}</p>
+  {% if error.description and codigo == 400 %}<p>{{ error.description }}</p>{% endif %}
+  <a class="btn btn-pri" href="{{ url_for('principal.inicio') }}">Volver al inicio</a>
+</div>
+{% endblock %}
+{% block publico %}
+{% set mensajes = {400: "La petición no es válida.", 403: "No tiene permiso para acceder a esta página.", 404: "La página o el registro que busca no existe."} %}
+<div class="login-fondo"><div class="login-caja centro">
+  <h2>Error {{ codigo }}</h2><p>{{ mensajes[codigo] }}</p>
+  {% if error.description and codigo == 400 %}<p>{{ error.description }}</p>{% endif %}
+  <a class="btn btn-pri" href="{{ url_for('auth.login') }}">Ir al inicio de sesión</a>
+</div></div>
+{% endblock %}

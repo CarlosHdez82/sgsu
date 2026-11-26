@@ -1,0 +1,39 @@
+{% macro estado(s) -%}
+<span class="chip chip-{{ s.estado|lower }}">{{ s.nombre_estado }}</span>
+{%- endmacro %}
+
+{% macro prioridad(p) -%}
+<span class="prio prio-{{ p|lower }}">{{ p|capitalize }}</span>
+{%- endmacro %}
+
+{% macro csrf() -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}
+
+{% macro tabla_solicitudes(lista, mostrar_solicitante=true) %}
+<div class="tabla-envoltura">
+<table class="tabla">
+  <thead><tr>
+    <th>Código</th><th>Asunto</th><th>Categoría</th><th>Prioridad</th><th>Estado</th>
+    {% if mostrar_solicitante %}<th>Solicitante</th>{% endif %}<th>Responsable</th><th>Registro</th>
+  </tr></thead>
+  <tbody>
+  {% for s in lista %}
+    <tr>
+      <td><a href="{{ url_for('solicitudes.detalle', sid=s.id) }}"><strong>{{ s.codigo }}</strong></a>
+        {% if s.vencida %}<span class="vencida" title="Superó el tiempo de respuesta">Vencida</span>{% endif %}</td>
+      <td>{{ s.asunto }}</td>
+      <td>{{ s.categoria.nombre }}</td>
+      <td>{{ prioridad(s.prioridad) }}</td>
+      <td>{{ estado(s) }}</td>
+      {% if mostrar_solicitante %}<td>{{ s.solicitante.nombre }}</td>{% endif %}
+      <td>{{ s.responsable.nombre if s.responsable else '—' }}</td>
+      <td class="nowrap">{{ s.fecha_registro|fecha(false) }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="vacio">No hay solicitudes para mostrar.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endmacro %}

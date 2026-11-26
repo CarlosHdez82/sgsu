@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}{{ 'Editar' if u else 'Nuevo' }} usuario{% endblock %}
+{% block encabezado %}{{ 'Editar usuario' if u else 'Nuevo usuario' }}{% endblock %}
+{% block cuerpo %}
+<div class="tarjeta angosta">
+  <form method="post" class="form">
+    {{ csrf() }}
+    <div class="dos-campos">
+      <label>Documento *<input name="documento" required value="{{ datos.documento or '' }}" inputmode="numeric"></label>
+      <label>Nombre completo *<input name="nombre" required value="{{ datos.nombre or '' }}"></label>
+    </div>
+    <label>Correo institucional *<input type="email" name="correo" required value="{{ datos.correo or '' }}"></label>
+    <div class="dos-campos">
+      <label>Rol *
+        <select name="rol_id" required>
+          <option value="">Seleccione…</option>
+          {% for r in roles %}<option value="{{ r.id }}" {{ 'selected' if rol_id == r.id }}>{{ r.nombre|capitalize }}</option>{% endfor %}
+        </select></label>
+      <label>Dependencia o programa<input name="dependencia" value="{{ datos.dependencia or '' }}"></label>
+    </div>
+    <label>{{ 'Nueva contraseña (déjela vacía para no cambiarla)' if u else 'Contraseña *' }}
+      <input type="password" name="clave" {{ '' if u else 'required' }} autocomplete="new-password"></label>
+    <p class="muted">Mínimo 8 caracteres, con letras y números. Se guarda cifrada (hash), nunca en texto plano.</p>
+    <label class="check"><input type="checkbox" name="activo" {{ 'checked' if activo }}> Usuario activo</label>
+    <div class="fila-botones">
+      <button class="btn btn-pri">Guardar</button>
+      <a class="btn btn-sec" href="{{ url_for('usuarios.lista') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

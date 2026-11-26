@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block publico %}
+<div class="login-fondo">
+  <div class="login-caja">
+    <div class="marca grande"><span class="logo">SG</span>
+      <div><strong>SGSU</strong><small>Sistema de Gestión de Solicitudes Universitarias</small></div></div>
+    <p class="sub">{{ institucion }}</p>
+    {% for cat, msg in get_flashed_messages(with_categories=true) %}
+      <div class="alerta alerta-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    <form method="post" class="form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Correo institucional
+        <input type="email" name="correo" required autofocus value="{{ request.form.correo or '' }}"></label>
+      <label>Contraseña
+        <input type="password" name="clave" required></label>
+      <button class="btn btn-pri ancho">Ingresar</button>
+    </form>
+    <p class="ayuda">¿Problemas para ingresar? Comuníquese con la mesa de ayuda de la institución.</p>
+  </div>
+</div>
+{% endblock %}

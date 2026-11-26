@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_macros.html" import tabla_solicitudes with context %}
+{% block titulo %}Reportes{% endblock %}
+{% block encabezado %}Reportes y estadísticas{% endblock %}
+{% macro barras(datos) %}
+  {% set maximo = (datos|map(attribute=1)|max) if datos else 0 %}
+  <div class="barras">
+  {% for nombre, n in datos %}
+    <div class="barra-fila"><span class="barra-nombre">{{ nombre }}</span>
+      <span class="barra-pista"><span class="barra-relleno" style="width: {{ (100 * n / maximo) if maximo else 0 }}%"></span></span>
+      <b class="barra-valor">{{ n }}</b></div>
+  {% else %}<p class="muted">Sin datos.</p>{% endfor %}
+  </div>
+{% endmacro %}
+{% block cuerpo %}
+<form class="filtros" method="get">
+  <label class="mini">Desde<input type="date" name="desde" value="{{ args.desde or '' }}"></label>
+  <label class="mini">Hasta<input type="date" name="hasta" value="{{ args.hasta or '' }}"></label>
+  <select name="estado"><option value="">Estado</option>{% for k, n in estados %}<option value="{{ k }}" {{ 'selected' if args.estado == k }}>{{ n }}</option>{% endfor %}</select>
+  <select name="categoria"><option value="">Categoría</option>{% for c in categorias %}<option value="{{ c.id }}" {{ 'selected' if args.categoria == c.id|string }}>{{ c.nombre }}</option>{% endfor %}</select>
+  <select name="prioridad"><option value="">Prioridad</option>{% for p in prioridades %}<option value="{{ p }}" {{ 'selected' if args.prioridad == p }}>{{ p|capitalize }}</option>{% endfor %}</select>
+  <select name="responsable"><option value="">Responsable</option>{% for u in funcionarios %}<option value="{{ u.id }}" {{ 'selected' if args.responsable == u.id|string }}>{{ u.nombre }}</option>{% endfor %}</select>
+  <button class="btn btn-sec">Aplicar</button>
+  <a class="limpiar" href="{{ url_for('reportes.index') }}">Limpiar</a>
+  <a class="btn btn-pri derecha" href="{{ url_for('reportes.exportar', **args) }}">Exportar CSV</a>
+</form>
+
+<div class="kpis">
+  <div class="kpi"><span>Total en el periodo</span><b>{{ r.total }}</b></div>
+  <div class="kpi"><span>Abiertas</span><b>{{ r.abiertas }}</b></div>
+  <div class="kpi {{ 'alerta-kpi' if r.vencidas }}"><span>Vencidas</span><b>{{ r.vencidas }}</b></div>
+  <div class="kpi"><span>Tiempo medio de resolución</span><b>{{ r.promedio_horas if r.promedio_horas is not none else '—' }} h</b></div>
+  <div class="kpi"><span>Resueltas a tiempo</span><b>{{ r.cumplimiento if r.cumplimiento is not none else '—' }} %</b></div>
+</div>
+
+<div class="rejilla">
+  <div class="tarjeta"><h3>Por estado</h3>{{ barras(r.por_estado) }}</div>
+  <div class="tarjeta"><h3>Por categoría</h3>{{ barras(r.por_categoria) }}</div>
+  <div class="tarjeta"><h3>Por prioridad</h3>{{ barras(r.por_prioridad) }}</div>
+  <div class="tarjeta"><h3>Por responsable</h3>{{ barras(r.por_responsable) }}</div>
+</div>
+
+<div class="tarjeta">
+  <h3>Detalle ({{ r.lista|length }})</h3>
+  {{ tabla_solicitudes(r.lista) }}
+</div>
+{% endblock %}

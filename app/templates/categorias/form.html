@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Categoría{% endblock %}
+{% block encabezado %}{{ 'Editar categoría' if c else 'Nueva categoría' }}{% endblock %}
+{% block cuerpo %}
+<div class="tarjeta angosta">
+  <form method="post" class="form">
+    {{ csrf() }}
+    <label>Nombre *<input name="nombre" required value="{{ nombre }}"></label>
+    <label>Descripción<textarea name="descripcion" rows="3">{{ descripcion }}</textarea></label>
+    <label>Tiempo de respuesta (horas) *<input type="number" name="tiempo_respuesta_horas" min="1" max="720" required value="{{ horas }}"></label>
+    <label class="check"><input type="checkbox" name="activa" {{ 'checked' if activa }}> Categoría activa</label>
+    <div class="fila-botones">
+      <button class="btn btn-pri">Guardar</button>
+      <a class="btn btn-sec" href="{{ url_for('categorias.lista') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
