@@ -33,7 +33,7 @@ Ciclo de vida: `REGISTRADA → ASIGNADA → EN PROCESO → RESUELTA → CERRADA`
 ## Instalación
 
 ```bash
-git clone <url-del-repositorio> sgsu
+git clone https://github.com/CarlosHdez82/sgsu.git
 cd sgsu
 python -m venv .venv
 # Windows: .venv\Scripts\activate    ·    Linux/macOS: source .venv/bin/activate
