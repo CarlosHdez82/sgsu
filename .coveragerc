@@ -1,0 +1,4 @@
+[run]
+source = app
+# semilla.py solo carga datos de demostración; no forma parte de la lógica evaluada
+omit = app/semilla.py
